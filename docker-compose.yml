@@ -1,0 +1,93 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: ak-mcp-server
+    volumes:
+      - ./app:/usr/src/app/app
+      - ./tests:/usr/src/app/tests
+      - ./scripts:/usr/src/app/scripts
+      - ./keys:/usr/src/app/keys
+      - ./alembic:/usr/src/app/alembic
+      - ./alembic.ini:/usr/src/app/alembic.ini
+      - ./pyproject.toml:/usr/src/app/pyproject.toml
+      - ./uv.lock:/usr/src/app/uv.lock
+    ports:
+      - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+    depends_on:
+      # - app-db  # DB依存削除（ステートレス化）
+      - redis
+    networks:
+      - ak-mcp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  # DB依存削除（ステートレス化）
+  # 将来的に必要になった場合はコメント解除
+  # app-db:
+  #   image: postgres:17
+  #   restart: unless-stopped
+  #   volumes:
+  #     - app-db-store:/var/lib/postgresql/data
+  #   container_name: ak-mcp-db
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_DB: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - ak-mcp-network
+
+  # Redis for JWT token caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: ak-mcp-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-store:/data
+    command: redis-server --appendonly yes
+    networks:
+      - ak-mcp-network
+
+  # テスト用クライアント
+  test-client:
+    build:
+      context: .
+      dockerfile: docker/test_client/Dockerfile
+    container_name: ak-mcp-test-client
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./scripts/mcp_client:/app/mcp_client
+    environment:
+      - MCP_SERVER_URL=http://app:8000
+      - MCP_PROTOCOL=sse
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - ak-mcp-network
+    profiles:
+      - test
+
+volumes:
+  # app-db-store:  # DB依存削除（ステートレス化）
+  redis-store:
+
+networks:
+  ak-mcp-network:
+    driver: bridge

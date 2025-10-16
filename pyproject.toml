@@ -1,0 +1,176 @@
+[project]
+name = "fastapi-mcp-server"
+version = "0.1.0"
+description = "FastAPI-MCP Server with Docker support"
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+# readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+
+dependencies = [
+    # FastAPI Core
+    "fastapi>=0.104.0",
+    "fastapi-mcp>=0.4.0",
+    "uvicorn[standard]>=0.24.0",
+    "gunicorn>=21.2.0",
+    # Database
+    "sqlalchemy[postgresql]>=2.0.0",
+    "alembic>=1.12.0",
+    "psycopg2-binary>=2.9.0",
+    "asyncpg>=0.29.0",
+    # Authentication & Security
+    "pyjwt[crypto]>=2.8.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.6",
+    "cryptography>=41.0.0",
+    # AI Services
+    "openai>=1.0.0",
+    "azure-search-documents>=11.4.0",
+    "azure-core>=1.29.0",
+    # PDF Processing
+    "pypdf>=3.17.0",
+    # Configuration & Environment
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.4.0",
+    "pydantic-settings>=2.0.0",
+    # HTTP Client
+    "httpx>=0.25.0",
+    "aiohttp>=3.9.0",
+    # Caching
+    "redis>=5.0.0",
+    "aioredis>=2.0.0",
+    # Utilities
+    "python-json-logger>=2.0.0",
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "typer>=0.9.0",
+    "psutil>=5.9.0",
+    # Development Tools (commented out due to libcst build issues)
+    # "python-dev-tools>=2023.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "httpx>=0.25.0",
+    
+    # Code Quality
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.6.0",
+    "pre-commit>=3.5.0",
+    
+    # Development
+    "watchfiles>=0.21.0",
+    "python-dotenv>=1.0.0",
+]
+
+production = [
+    # Production monitoring
+    "prometheus-client>=0.19.0",
+    "sentry-sdk[fastapi]>=1.38.0",
+    
+    # Performance
+    "orjson>=3.9.0",
+    "msgpack>=1.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes = true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=app --cov-report=term-missing"
+testpaths = [
+    "tests",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
