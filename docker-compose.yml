@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/app/Dockerfile
-    container_name: ak-mcp-server
+    container_name: sample-mcp-server
     volumes:
       - ./app:/usr/src/app/app
       - ./tests:/usr/src/app/tests
@@ -25,7 +25,7 @@ services:
       # - app-db  # DB依存削除（ステートレス化）
       - redis
     networks:
-      - ak-mcp-network
+      - sample-mcp-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 60s
@@ -40,7 +40,7 @@ services:
   #   restart: unless-stopped
   #   volumes:
   #     - app-db-store:/var/lib/postgresql/data
-  #   container_name: ak-mcp-db
+  #   container_name: sample-mcp-db
   #   environment:
   #     POSTGRES_USER: postgres
   #     POSTGRES_DB: postgres
@@ -48,27 +48,27 @@ services:
   #   ports:
   #     - "5432:5432"
   #   networks:
-  #     - ak-mcp-network
+  #     - sample-mcp-network
 
   # Redis for JWT token caching (optional)
   redis:
     image: redis:7-alpine
-    container_name: ak-mcp-redis
+    container_name: sample-mcp-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6381:6379"
     volumes:
       - redis-store:/data
     command: redis-server --appendonly yes
     networks:
-      - ak-mcp-network
+      - sample-mcp-network
 
   # テスト用クライアント
   test-client:
     build:
       context: .
       dockerfile: docker/test_client/Dockerfile
-    container_name: ak-mcp-test-client
+    container_name: sample-mcp-test-client
     tty: true
     stdin_open: true
     volumes:
@@ -80,7 +80,7 @@ services:
       app:
         condition: service_healthy
     networks:
-      - ak-mcp-network
+      - sample-mcp-network
     profiles:
       - test
 
@@ -89,5 +89,5 @@ volumes:
   redis-store:
 
 networks:
-  ak-mcp-network:
+  sample-mcp-network:
     driver: bridge
