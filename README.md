@@ -95,10 +95,14 @@ cd mcp-server
 make env-up-all
 
 # 3. ブラウザでアクセス
-open http://localhost:8030/
+open http://localhost:8000/
 ```
 
 → 自動的にSwagger UI（API仕様書）にリダイレクトされます
+
+**注意**: ポート番号は `docker-compose.yml` の `ports` 設定に応じて変わります。
+- デフォルト: `8000:8000` → `http://localhost:8000/`
+- 変更例: `8031:8000` → `http://localhost:8031/`
 
 ### 詳細な起動手順
 
@@ -133,10 +137,10 @@ make env-up-app
 make app-logs
 
 # ヘルスチェック
-curl -s http://localhost:8030/health | jq
+curl -s http://localhost:8000/health | jq
 
 # サーバー情報
-curl -s http://localhost:8030/info | jq
+curl -s http://localhost:8000/info | jq
 ```
 
 ## 開発
@@ -244,12 +248,14 @@ make env-down-v
 
 | エンドポイント | 説明 |
 |--------------|------|
-| `http://localhost:8030/` | ルート（Swagger UIにリダイレクト） |
-| `http://localhost:8030/docs` | Swagger UI（API仕様書） |
-| `http://localhost:8030/health` | ヘルスチェック |
-| `http://localhost:8030/info` | サーバー情報 |
-| `http://localhost:8030/mcp` | MCP SSEエンドポイント |
-| `http://localhost:8030/mcp-http` | MCP HTTPエンドポイント |
+| `http://localhost:8000/` | ルート（Swagger UIにリダイレクト） |
+| `http://localhost:8000/docs` | Swagger UI（API仕様書） |
+| `http://localhost:8000/health` | ヘルスチェック |
+| `http://localhost:8000/info` | サーバー情報 |
+| `http://localhost:8000/mcp` | MCP SSEエンドポイント |
+| `http://localhost:8000/mcp-http` | MCP HTTPエンドポイント |
+
+**注意**: ポート番号は `docker-compose.yml` の `ports` 設定（`<ホストポート>:8000`）に応じて変わります。
 
 ## 環境変数
 
